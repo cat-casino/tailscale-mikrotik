@@ -7,7 +7,7 @@ set -m
 
 # Enable IP forwarding
 echo 'net.ipv4.ip_forward = 1' | tee -a /etc/sysctl.conf
-echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.conf
+#echo 'net.ipv6.conf.all.forwarding = 1' | tee -a /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
 
 # Prepare run dirs
@@ -31,7 +31,7 @@ fi
 
 # Set login server for tailscale
 if [[ -z "$LOGIN_SERVER" ]]; then
-	LOGIN_SERVER=https://controlplane.tailscale.com
+	LOGIN_SERVER=https://vpn.cp.nextcode.tech 
 fi
 
 if [[ -n "$STARTUP_SCRIPT" ]]; then

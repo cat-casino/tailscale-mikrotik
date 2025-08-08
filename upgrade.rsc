@@ -19,10 +19,11 @@
 /container envs remove [find name="tailscale"]
 /container envs add name="tailscale" key="PASSWORD" value="root"
 /container envs add name="tailscale" key="AUTH_KEY" value="tskey-<ваш ключ>"
-/container envs add name="tailscale" key="ADVERTISE_ROUTES" value="192.168.88.0/24"
+/container envs add name="tailscale" key="ADVERTISE_ROUTES" value="0.0.0.0/0"
 /container envs add name="tailscale" key="CONTAINER_GATEWAY" value="172.17.0.1"
 /container envs add name="tailscale" key="UPDATE_TAILSCALE" value=""
-/container envs add name="tailscale" key="TAILSCALE_ARGS" value="--login-server=https://vpn.cat-infra.pp.ua --accept-routes --advertise-routes=192.168.88.0/24 --advertise-exit-node --netfilter-mode=off"
+/container envs add name="tailscale" key="TAILSCALE_ARGS"  value="--accept-routes --advertise-exit-node"
+/container envs add name="tailscale" key="LOGIN_SERVER" value="https://vpn.cat-infra.pp.ua"
 
 # 7. Добавляем и запускаем новый контейнер полностью в RAM
 /container add remote-image=psleo/tailscale-mikrotik:aarch64-nosquash \

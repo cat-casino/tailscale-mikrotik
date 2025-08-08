@@ -25,7 +25,7 @@
 # 6. Очищаем старые envs и добавляем свежие
 /container envs remove [find name="tailscale"]
 /container envs add name="tailscale" key="PASSWORD" value="root"
-/container envs add name="tailscale" key="AUTH_KEY" value="tskey-<ваш ключ>"
+/container envs add name="tailscale" key="AUTH_KEY" value="<ваш ключ>"
 /container envs add name="tailscale" key="ADVERTISE_ROUTES" value="0.0.0.0/0"
 /container envs add name="tailscale" key="CONTAINER_GATEWAY" value="172.17.0.1"
 /container envs add name="tailscale" key="UPDATE_TAILSCALE" value=""

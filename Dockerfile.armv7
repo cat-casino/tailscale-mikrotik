@@ -1,0 +1,30 @@
+﻿FROM alpine:3.19
+
+RUN apk add --no-cache \
+      ca-certificates \
+      iproute2 \
+      iptables \
+      iptables-legacy \
+      openssh \
+      openssl \
+      bash \
+      zlib && \
+    ln -sf /sbin/iptables-legacy /sbin/iptables && \
+    ln -sf /sbin/ip6tables-legacy /sbin/ip6tables && \
+    mkdir -p /etc/3proxy
+
+# копируем локально скомпилированные бинарники, переименовывая их
+COPY tailscale-armv7    /usr/local/bin/tailscale
+COPY tailscaled-armv7   /usr/local/bin/tailscaled
+COPY 3proxy-armv7       /usr/local/bin/3proxy
+
+# копируем логику запуска и конфиги
+COPY tailscale.sh       /usr/local/bin/tailscale.sh
+COPY sshd_config        /etc/ssh/sshd_config
+COPY 3proxy.cfg         /etc/3proxy/3proxy.cfg
+COPY entrypoint.sh      /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/tailscale.sh /usr/local/bin/entrypoint.sh
+
+EXPOSE 22 3128
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

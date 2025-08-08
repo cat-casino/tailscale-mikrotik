@@ -31,7 +31,7 @@ fi
 
 # Set login server for tailscale
 if [[ -z "$LOGIN_SERVER" ]]; then
-	LOGIN_SERVER=https://vpn.cp.nextcode.tech 
+	LOGIN_SERVER=https://vpn.cat-infra.pp.ua/
 fi
 
 if [[ -n "$STARTUP_SCRIPT" ]]; then

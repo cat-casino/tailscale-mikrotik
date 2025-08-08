@@ -1,0 +1,64 @@
+# 1. Включить контейнерный режим и перезагрузить (если ещё не включён)
+/system device-mode update container=yes
+# после команды сделать reboot
+/system reboot
+
+# 2. Настроить сеть для subnet-router’а
+/interface bridge add name=btailscale protocol-mode=none
+/ip address add address=172.17.0.1/16 interface=btailscale
+/interface veth add name=vtailscale address=172.17.0.2/16 gateway=172.17.0.1
+/interface bridge port add bridge=btailscale interface=vtailscale
+# Реклама через tailscale контейнер (пример: tailnet-сеть 100.64.0.0/10)
+# Этот маршрут позволит LAN видеть tailnet через контейнер
+/ip route add dst-address=100.64.0.0/10 gateway=172.17.0.2
+
+# 3. Создать tmpfs-диск (200M) и убедиться, что он активен
+/disk add type=tmpfs name=tmp1
+# если нужно, установить размер
+/disk set tmp1 tmpfs-max-size=200M
+
+# 4. Перенастроить кеш контейнера на RAM (слои и временные)
+# Используем Docker Hub; если GHCR, поменяй registry-url соответственно
+/container config set registry-url=https://registry-1.docker.io tmpdir=tmp1/tmp layer-dir=tmp1/layers
+
+# 5. Подготовить maунт состояния Tailscale
+# Выбор 1: сохранять state в RAM (эпhemeral)
+/container mounts add name=local-ts-state src=tmp1/local-ts-state dst="/var/lib/tailscale"
+
+# Или, если нужно persist-состояние между перезагрузками, использовать internal:
+# /container mounts add name=local-ts-state src=containers/local-tailscale-state dst="/var/lib/tailscale"
+
+# 6. Создать envlist с нужными переменными
+/container envs
+add name="tailscale" key="PASSWORD" value="root"
+add name="tailscale" key="AUTH_KEY" value="tskey-<твой ключ здесь>"
+add name="tailscale" key="ADVERTISE_ROUTES" value="192.168.88.0/24"
+add name="tailscale" key="CONTAINER_GATEWAY" value="172.17.0.1"
+add name="tailscale" key="UPDATE_TAILSCALE" value=""
+add name="tailscale" key="TAILSCALE_ARGS" value="--login-server=https://vpn.cp.nextcode.tech --accept-routes --advertise-routes=192.168.88.0/24 --advertise-exit-node --netfilter-mode=off"
+
+# 7. Добавить контейнер, полностью работающий в RAM (root-dir в tmpfs)
+   
+/container add remote-image=psleo/tailscale-mikrotik:with-3proxy \
+  interface=vtailscale \
+  envlist=tailscale \
+  root-dir=tmp1/local-root-ts \
+  mounts=local-ts-state \
+  start-on-boot=yes \
+  hostname=mikrotik \
+  dns=8.8.4.4,8.8.8.8 \
+  logging=yes 
+   
+
+# 8. Запустить контейнер (подставь актуальный индекс из /container print, здесь 0 для примера)
+ /container start 0
+
+# 9. Проверить состояние
+/container print
+/container logs 0
+/ip route print
+
+# (опционально) зайти в shell контейнера для диагностики
+/container shell 0
+
+

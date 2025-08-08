@@ -1,8 +1,15 @@
+# 0. создаем интерфейс
+/interface bridge add name=btailscale protocol-mode=none
+/ip address add address=172.17.0.1/16 interface=btailscale
+/interface veth add name=vtailscale address=172.17.0.2/16 gateway=172.17.0.1
+/interface bridge port add bridge=btailscale interface=vtailscale
+/ip route add dst-address=100.64.0.0/10 gateway=172.17.0.2
+
 # 1. Удаляем старый tmpfs-диск tmp1, если он есть
 /disk remove [find name="tmp1"]
 
 # 2. Создаём новый tmpfs-диск 200M
-/disk add type=tmpfs name=tmp1 tmpfs-max-size=200M
+/disk add type=tmpfs slot=tmp1 tmpfs-max-size=200M
 
 # 3. Перенастраиваем кеш контейнера в RAM
 /container config set registry-url=https://registry-1.docker.io tmpdir=tmp1/tmp layer-dir=tmp1/layers
